@@ -59,11 +59,9 @@ public class JobService {
                 if (request.getExecutionMode() == ExecutionMode.IMMEDIATE) {
                     return clockService.now();
                 }
-
                 // Else SCHEDULED
                 return request.getRunAt();
             }
-
             // RECURRING
             return CronUtils.computeNextRun(
                     request.getCronExpression(),
