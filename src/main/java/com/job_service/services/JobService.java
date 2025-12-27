@@ -53,21 +53,25 @@ public class JobService {
     }
 
     private Instant computeNextRunAt(CreateJobRequest request) {
+        try {
+            if (request.getJobType() == JobType.ONE_TIME) {
 
-        if (request.getJobType() == JobType.ONE_TIME) {
+                if (request.getExecutionMode() == ExecutionMode.IMMEDIATE) {
+                    return clockService.now();
+                }
 
-            if (request.getExecutionMode() == ExecutionMode.IMMEDIATE) {
-                return clockService.now();
+                // Else SCHEDULED
+                return request.getRunAt();
             }
 
-            // Else SCHEDULED
-            return request.getRunAt();
+            // RECURRING
+            return CronUtils.computeNextRun(
+                    request.getCronExpression(),
+                    clockService.now()
+            );
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            throw new BadRequestException(ex.getMessage());
         }
 
-        // RECURRING
-        return CronUtils.computeNextRun(
-                request.getCronExpression(),
-                clockService.now()
-        );
     }
 }

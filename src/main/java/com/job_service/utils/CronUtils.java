@@ -17,12 +17,11 @@ public class CronUtils {
      * @param cronExpression cron string (Spring-compatible)
      * @param fromInstant    reference time (usually now)
      * @return next execution time as Instant (UTC)
-     * @throws BadRequestException if cron is invalid or produces no future time
      */
     public static Instant computeNextRun(String cronExpression, Instant fromInstant) {
 
         if (cronExpression == null || cronExpression.isBlank()) {
-            throw new BadRequestException("cronExpression must be provided");
+            throw new IllegalArgumentException("cronExpression must be provided");
         }
 
         try {
@@ -32,14 +31,14 @@ public class CronUtils {
             ZonedDateTime next = cron.next(from);
 
             if (next == null) {
-                throw new BadRequestException(
+                throw new IllegalStateException(
                         "Cron expression does not produce any future execution time");
             }
 
             return next.toInstant();
 
-        } catch (IllegalArgumentException ex) {
-            throw new BadRequestException(
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(
                     "Invalid cron expression: " + cronExpression);
         }
     }
